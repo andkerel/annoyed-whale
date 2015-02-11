@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Annoyed Whale</title> 
+
+<!-- By: Andrea Kereliuk for Sheridan's IMM Program, 2015 -->
+
+<link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+
+<!-- for Google -->
+<meta name="description" content="This whale is bound to get annoyed if you keep poking it. Pack a rain coat if you're sitting in the splash zone!" />
+<meta name="keywords" content="createJS, whale" />    
+<meta name="author" content="Andrea Kereliuk" />
+
+<!-- for Facebook -->          
+<meta property="og:title" content="Annoyed Whale" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="url_to-image_for_facebook" />
+<meta property="og:url" content="url_of_app" />
+<meta property="og:description" content="This whale is bound to get annoyed if you keep poking it. Pack a rain coat if you're sitting in the splash zone!" />
+
+<!-- for Twitter -->          
+<meta name="twitter:card" content="summary" /> 
+<meta name="twitter:title" content="Annoyed Whale" />
+<meta name="twitter:description" content="Poke the whale and try not to get splashed!" />
+<meta name="twitter:image" content="url_to-image" />
+
+<!-- for Apple -->
+<meta name="viewport" content="user-scalable=no, minimal-ui" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<style>
+	body {margin:0px; padding:0px; background-color:#000;}
+	#myCanvas {position:absolute; background-color:#ebfaff;}
+</style>
+
+
+<script src="http://code.createjs.com/createjs-2014.12.12.min.js"></script>
+<script src="js/whale.js"></script>
+
+<script>
+
+//set stageW and stageH to be used for somewhat RWD
+var stageW = Math.min(window.innerWidth, screen.width);
+var stageH = Math.min(window.innerHeight, screen.height);
+
+
+function init() {
+
+	//set up stage	
+	stage = new createjs.Stage("myCanvas"); 
+	stage.setBounds(0, 0, stageW, stageH);
+	stage.enableMouseOver(10); 
+	createjs.Touch.enable(stage,true); 
+	
+	annoyedWhale(); 
+	
+}
+
+
+
+function annoyedWhale() {
+
+	console.log("Annoyed Whale; by Andrea Kereliuk 2015");
+
+	//
+    //initialize variables
+	var count = 0;
+	var chance;
+	var timeScore = 0;
+	var timer = 1;
+	
+    // new tail (scale, x position, wiggle)
+	var testTail = new whale.Tail(5,80,true);
+	testTail.cursor = "pointer";
+
+	// new waves (scale, speed)
+	var testWaves = new whale.Waves(2,null);
+	
+	//game initiate
+	testTail.tailContainer.addEventListener('click', function(e) {
+
+		// add timer to score; adjusted so that less time = more points
+		timeScore += (100/timer);
+
+		// reset timer
+		timer = 1;
+
+		// chance score addition
+		chance = count*Math.random()*4;
+
+		if (chance < 12) {
+
+			//up count
+			count += 1;
+
+			function timerCount() {
+				setInterval(function() {
+					timer +=1;
+				}, 200);
+			} // end timercount
+
+			//animation
+			createjs.Tween.get(e.target).to({x:stageW/2, y:stageH}, 1000, createjs.Ease.quadInOut)
+			.wait(15)
+			.to({x:Math.floor(Math.random()*stageW/3*2), y:0, alpha:1}, 1000, createjs.Ease.quadInOut)
+			.wait(15).call(timerCount);
+
+			// start timer to next click
+
+
+		} else {
+			// "Splash"
+			createjs.Tween.get(e.target).to({x:0, y:0}, 700, createjs.Ease.quadInOut).wait(10);
+
+			var waterUp = new createjs.Shape();
+			waterUp.graphics.f("#36bdf1").r(0, 0, stageW, stageH);
+			waterUp.x = 0;
+			waterUp.y = stageH;
+
+			stage.addChild(waterUp);
+
+			function scoreShow() {
+
+				//show score!
+				var splashText = new createjs.Text();
+				splashText.text = "Too bad, you got splashed!";
+				splashText.font = "1.333em Verdana";
+				splashText.color = "#000000";
+				splashText.x = stageW/3;
+				splashText.y = stageH/5;
+
+				var scoreText = new createjs.Text("Your score is "+Math.round(timeScore+count)+" for this round!",
+					"1.333em Verdana", 
+					"#000000");
+				scoreText.x = stageW/3;
+				scoreText.y = stageH/4;
+
+				var tryAgain = new createjs.Text("Click anywhere to try again!",
+					"1.333em Verdana", 
+					"#000000");
+				tryAgain.x = stageW/3;
+				tryAgain.y = stageH/3;
+
+				stage.addChild(splashText);
+				stage.addChild(scoreText);
+				stage.addChild(tryAgain);
+
+				// start game over
+				document.addEventListener("click", function() {
+					window.location.reload(true);
+				});
+
+			} // end scoreShow
+
+			createjs.Tween.get(waterUp).to({x:0, y:0, alpha:1}, 2000, createjs.Ease.quadOut).call(scoreShow);
+
+		} // end game if else
+
+	});
+
+	var stageTick = createjs.Ticker.on("tick", stage).setInterval(5);
+
+	stage.update();
+
+}
+
+</script>
+
+
+</head>
+
+<body>
+
+<canvas id="myCanvas">annoyedWhale</canvas>
+<script>
+	//set up canvas size
+	var canvas = document.getElementById("myCanvas");
+	canvas.setAttribute("width", stageW);
+	canvas.setAttribute("height", stageH);
+
+	window.addEventListener('load', init);
+</script>
+
+</div>
+</body>
+</html>
